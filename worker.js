@@ -6,7 +6,7 @@ let extraBreakCount = 0;
 let longWorkCount = 0;
 const longWorkTime = 1500;
 const maxBreakCnt = 4;
-const extraBreakTime = 10;
+const extraBreakTime = 600;
 const freezeTime = 600;
 
 
@@ -53,7 +53,12 @@ function update()
     updateLongWork();
     
     if(extraBreakCount == maxBreakCnt)
+    {
         state = -1;
+        tick = Math.floor(tick/5);
+        tick += extraBreakCount * extraBreakTime;
+        extraBreakCount = 0;
+    }
 
     post(state, tick, longWorkCount, extraBreakCount);
 
