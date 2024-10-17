@@ -53,12 +53,25 @@ function update()
 
 onmessage = function(e){
     state = e.data;
-    if(state == 0)
-    {
-        tick = 0;
-    }
     if (timeoutID == null)
     {
         update();
+    }
+    else
+    {
+        if(state == 0)
+        {
+            tick = 0;
+            longWorkCount = 0;
+            extraBreakCount = 0;
+            mess = {
+                "tick": tick,
+                "state": state,
+                "longWorkCount": longWorkCount,
+                "extraBreakCount": extraBreakCount
+            };
+            self.postMessage(mess);
+            timeoutID = clearTimeout(timeoutID);
+        }
     }
 }
