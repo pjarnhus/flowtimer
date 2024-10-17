@@ -59,25 +59,22 @@ function update()
 
 onmessage = function(e){
     state = e.data;
-    if (timeoutID == null)
+    if(timeoutID != null)
     {
-        update();
+        clearTimeout(timeoutID);
     }
-    else
+    if(state == 0)
     {
-        if(state == 0)
-        {
-            tick = 0;
-            longWorkCount = 0;
-            extraBreakCount = 0;
-            post(state, tick, longWorkCount, extraBreakCount);
-            timeoutID = clearTimeout(timeoutID);
-        }
-        else if(state == -1)
-        {
-            tick = Math.floor(tick/5);
-            tick += extraBreakCount * extraBreakTime;
-            extraBreakCount = 0;
-        }
+        tick = 0;
+        longWorkCount = 0;
+        extraBreakCount = 0;
+        post(state, tick, longWorkCount, extraBreakCount);
     }
+    else if(state == -1)
+    {
+        tick = Math.floor(tick/5);
+        tick += extraBreakCount * extraBreakTime;
+        extraBreakCount = 0;
+    }
+    update();
 }
