@@ -66,6 +66,7 @@ onmessage = function(e){
     if(state == 0)
     {
         tick = 0;
+        longWorkTick = 0;
         longWorkCount = 0;
         extraBreakCount = 0;
         post(state, tick, longWorkCount, extraBreakCount);
