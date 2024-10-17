@@ -8,6 +8,17 @@ const longWorkTime = 1500;
 const maxBreakCnt = 4;
 
 
+function post(state, tick, longWorkCount, extraBreakCount)
+{
+    mess = {
+        "tick": tick,
+        "state": state,
+        "longWorkCount": longWorkCount,
+        "extraBreakCount": extraBreakCount
+    };
+    self.postMessage(mess);
+    return
+}
 function updateLongWork()
 {
     longWorkTick += state;
@@ -41,13 +52,7 @@ function update()
     if(extraBreakCount == maxBreakCnt)
         state = -1;
 
-    mess = {
-        "tick": tick,
-        "state": state,
-        "longWorkCount": longWorkCount,
-        "extraBreakCount": extraBreakCount
-    };
-    self.postMessage(mess);
+    post(state, tick, longWorkCount, extraBreakCount);
 
 }
 
@@ -64,13 +69,7 @@ onmessage = function(e){
             tick = 0;
             longWorkCount = 0;
             extraBreakCount = 0;
-            mess = {
-                "tick": tick,
-                "state": state,
-                "longWorkCount": longWorkCount,
-                "extraBreakCount": extraBreakCount
-            };
-            self.postMessage(mess);
+            post(state, tick, longWorkCount, extraBreakCount);
             timeoutID = clearTimeout(timeoutID);
         }
     }
