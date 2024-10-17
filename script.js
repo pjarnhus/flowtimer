@@ -2,22 +2,10 @@ let activityBtn = document.getElementById('start')
 let stopBtn = document.getElementById('stop')
 let tracker = document.getElementById('tracker')
 
-// Settings
-const freezeTime = 600;
-const extraBreakTime = 600;
-const longWorkTime = 1500;
-
-// Global Variables
-let state = 0;
-let prev_state = 0;
-
-let tick = 0;
-let longWorkTick = 0;
-let longWorkCount = 0;
-let extraBreakCount = 0;
-
-let timeoutID = null;
 let maxBreakCnt = tracker.children.length;
+let extraBreakCount = 0;
+let longWorkCount = 0;
+let state = 0;
 
 // Display Functions
 function formatOutput(n)
@@ -44,22 +32,6 @@ function updateTitle(hr, min, sec)
         document.title = "FlowTimer - Break - " + formatOutput(hr) + ":" + formatOutput(min) + ":" + formatOutput(sec);
 }    
 
-function updateButton()
-{
-    if(state == 1)
-        activityBtn.disabled = tick < freezeTime;
-    if(activityBtn.disabled)
-    {
-        activityBtn.classList.remove('active');
-        activityBtn.classList.add('inactive');
-    }
-    else
-    {
-        activityBtn.classList.remove('inactive');
-        activityBtn.classList.add('active');
-    }
-
-}
 
 function updateTracker()
 {
@@ -79,7 +51,7 @@ function updateTracker()
     }
 }
 
-function updateDisplay()
+function updateDisplay(tick)
 {
     let sec = tick;
     let hr = Math.floor(tick/3600);
@@ -88,34 +60,33 @@ function updateDisplay()
     sec = sec - 60 * min;
     updateClock(hr, min, sec);
     updateTitle(hr, min, sec);
-    updateButton();
     updateTracker();
 }
 
-function updateLongWork()
+
+function updateButton(newState)
 {
-    longWorkTick += state;
-    
-    if(longWorkTick == longWorkTime)
+    activityBtn.disabled = newState;
+    if(activityBtn.disabled)
     {
-        longWorkCount++;
-        longWorkTick = 0;
+        activityBtn.classList.remove('active');
+        activityBtn.classList.add('inactive');
     }
-    
-    if(longWorkCount + extraBreakCount == maxBreakCnt)
+    else
     {
-        extraBreakCount++;
-        longWorkCount = 0;
+        activityBtn.classList.remove('inactive');
+        activityBtn.classList.add('active');
     }
+
 }
+
+
 function onStateChange()
 {
     if(state == 0)
     {
-        tick = 0;
-        longWorkTick = 0;
         activityBtn.innerHTML = 'Work';
-        activityBtn.disabled = false;
+        updateButton(false);
         return
     }
     if(state == 1)
@@ -123,68 +94,31 @@ function onStateChange()
         activityBtn.innerHTML = 'Break';
         return
     }
-    if(state == -1)
+}
+
+
+const worker = new Worker('worker.js');
+
+worker.onmessage = (event) => {
+    extraBreakCount = event.data['extraBreakCount'];
+    longWorkCount = event.data['longWorkCount'];
+    if(state != event.data['state'])
     {
-        tick = Math.floor(tick/5);
-        tick += extraBreakCount * extraBreakTime;
-        extraBreakCount = 0;
-        activityBtn.disabled = true;
-        return
-    }
-    
-}
-
-function resetTicks()
-{
-    tick = 0;
-    longWorkTick = 0;
-}
-
-function resetCounts()
-{
-    extraBreakCount = 0;
-    longWorkCount = 0;
-}
-
-function update()
-{
-    if(state != 0)
-        timeoutID = setTimeout(update, 1000);
-    
-    if(prev_state != state)
-    {
+        state = event.data['state'];
         onStateChange();
-        prev_state = state;
     }
-
-    tick += state;
-
-    if(tick == 0)
-        state = 0;
-    
-    updateLongWork();
-    
-    if(extraBreakCount == maxBreakCnt)
-        state = -1;
-
-    updateDisplay();
-
+    if((event.data['disableButton'] ^ activityBtn.disabled) && state == 1)
+    {
+        updateButton(event.data['disableButton']);
+    }
+    updateDisplay(event.data['tick']);
 }
 
 activityBtn.addEventListener('click', () => {
-    state = state == 1 ? -1 : 1;
-    if(timeoutID)
-        timeoutID = clearTimeout(timeoutID);
-    update();
+    worker.postMessage(activityBtn.innerHTML == 'Break' ? -1 : 1);
 });
 
 
 stopBtn.addEventListener('click', () => {
-    state = 0;
-    resetCounts();
-    resetTicks();
-
-    if(timeoutID)
-        timeoutID = clearTimeout(timeoutID);
-    update();
+    worker.postMessage(0);
 });
