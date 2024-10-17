@@ -4,19 +4,7 @@ let tracker = document.getElementById('tracker')
 
 // Settings
 const freezeTime = 600;
-const extraBreakTime = 600;
-const longWorkTime = 1500;
 
-// Global Variables
-let state = 0;
-let prev_state = 0;
-
-let tick = 0;
-let longWorkTick = 0;
-let longWorkCount = 0;
-let extraBreakCount = 0;
-
-let timeoutID = null;
 let maxBreakCnt = tracker.children.length;
 
 // Display Functions
@@ -79,7 +67,7 @@ function updateTracker()
     }
 }
 
-function updateDisplay()
+function updateDisplay(tick)
 {
     let sec = tick;
     let hr = Math.floor(tick/3600);
@@ -88,26 +76,10 @@ function updateDisplay()
     sec = sec - 60 * min;
     updateClock(hr, min, sec);
     updateTitle(hr, min, sec);
-    updateButton();
-    updateTracker();
+    //updateButton();
+    //updateTracker();
 }
 
-function updateLongWork()
-{
-    longWorkTick += state;
-    
-    if(longWorkTick == longWorkTime)
-    {
-        longWorkCount++;
-        longWorkTick = 0;
-    }
-    
-    if(longWorkCount + extraBreakCount == maxBreakCnt)
-    {
-        extraBreakCount++;
-        longWorkCount = 0;
-    }
-}
 function onStateChange()
 {
     if(state == 0)
@@ -134,57 +106,17 @@ function onStateChange()
     
 }
 
-function resetTicks()
-{
-    tick = 0;
-    longWorkTick = 0;
-}
+const worker = new Worker('worker.js');
 
-function resetCounts()
-{
-    extraBreakCount = 0;
-    longWorkCount = 0;
-}
-
-function update()
-{
-    if(state != 0)
-        timeoutID = setTimeout(update, 1000);
-    
-    if(prev_state != state)
-    {
-        onStateChange();
-        prev_state = state;
-    }
-
-    tick += state;
-
-    if(tick == 0)
-        state = 0;
-    
-    updateLongWork();
-    
-    if(extraBreakCount == maxBreakCnt)
-        state = -1;
-
-    updateDisplay();
-
+worker.onmessage = (event) => {
+    updateDisplay(event.data['tick']);
 }
 
 activityBtn.addEventListener('click', () => {
-    state = state == 1 ? -1 : 1;
-    if(timeoutID)
-        timeoutID = clearTimeout(timeoutID);
-    update();
+    worker.postMessage(1);
 });
 
 
 stopBtn.addEventListener('click', () => {
-    state = 0;
-    resetCounts();
-    resetTicks();
-
-    if(timeoutID)
-        timeoutID = clearTimeout(timeoutID);
-    update();
+    worker.postMessage(0);
 });
