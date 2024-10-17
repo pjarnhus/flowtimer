@@ -1,9 +1,11 @@
 let state = 0;
 let timeoutID = null;
 let tick = 0;
-let longWorkTick = 0;
 let extraBreakCount = 0;
 let longWorkCount = 0;
+let longWorkTick = 0;
+let startTime = Date.now();
+let targetTime = 0;
 const longWorkTime = 1500;
 const maxBreakCnt = 4;
 const extraBreakTime = 600;
@@ -22,41 +24,42 @@ function post(state, tick, longWorkCount, extraBreakCount)
     self.postMessage(mess);
     return
 }
-function updateLongWork()
+function updateLongWork(tick)
 {
-    longWorkTick += state;
     
-    if(longWorkTick == longWorkTime)
-    {
+    let tempTick = tick % longWorkTime;
+    if(longWorkTick > tempTick)
         longWorkCount++;
-        longWorkTick = 0;
-    }
     
     if(longWorkCount + extraBreakCount == maxBreakCnt)
     {
         extraBreakCount++;
         longWorkCount = 0;
     }
+    longWorkTick = tempTick;
 }
 
 
 function update()
 {
     if(state != 0)
-        timeoutID = setTimeout(update, 1000);
+        timeoutID = setTimeout(update, 100);
     
-    tick += state;
+    currentTime = Date.now();
+    
+    tick = targetTime + state * Math.floor((currentTime-startTime)/1000);
 
-    if(tick == 0)
+    if(tick <= 0 && state == -1)
         state = 0;
     
-    updateLongWork();
+    if(state == 1)
+        updateLongWork(tick);
     
     if(extraBreakCount == maxBreakCnt)
     {
         state = -1;
-        tick = Math.floor(tick/5);
-        tick += extraBreakCount * extraBreakTime;
+        targetTime = Math.floor(tick/5);
+        targetTime += extraBreakCount * extraBreakTime;
         extraBreakCount = 0;
     }
 
@@ -66,6 +69,8 @@ function update()
 
 onmessage = function(e){
     state = e.data;
+    startTime = Date.now();
+    targetTime = 0;
     if(timeoutID != null)
     {
         clearTimeout(timeoutID);
@@ -80,8 +85,8 @@ onmessage = function(e){
     }
     else if(state == -1)
     {
-        tick = Math.floor(tick/5);
-        tick += extraBreakCount * extraBreakTime;
+        targetTime = Math.floor(tick/5);
+        targetTime += extraBreakCount * extraBreakTime;
         extraBreakCount = 0;
     }
     update();
