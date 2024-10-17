@@ -6,6 +6,9 @@ let tracker = document.getElementById('tracker')
 const freezeTime = 600;
 
 let maxBreakCnt = tracker.children.length;
+let extraBreakCount = 0;
+let longWorkCount = 0;
+let state = 0;
 
 // Display Functions
 function formatOutput(n)
@@ -77,15 +80,13 @@ function updateDisplay(tick)
     updateClock(hr, min, sec);
     updateTitle(hr, min, sec);
     //updateButton();
-    //updateTracker();
+    updateTracker();
 }
 
 function onStateChange()
 {
     if(state == 0)
     {
-        tick = 0;
-        longWorkTick = 0;
         activityBtn.innerHTML = 'Work';
         activityBtn.disabled = false;
         return
@@ -109,6 +110,13 @@ function onStateChange()
 const worker = new Worker('worker.js');
 
 worker.onmessage = (event) => {
+    extraBreakCount = event.data['extraBreakCount'];
+    longWorkCount = event.data['longWorkCount'];
+    if(state != event.data['state'])
+    {
+        state = event.data['state'];
+        onStateChange();
+    }
     updateDisplay(event.data['tick']);
 }
 
