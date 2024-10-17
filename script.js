@@ -98,9 +98,6 @@ function onStateChange()
     }
     if(state == -1)
     {
-        tick = Math.floor(tick/5);
-        tick += extraBreakCount * extraBreakTime;
-        extraBreakCount = 0;
         activityBtn.disabled = true;
         return
     }
@@ -121,7 +118,7 @@ worker.onmessage = (event) => {
 }
 
 activityBtn.addEventListener('click', () => {
-    worker.postMessage(1);
+    worker.postMessage(activityBtn.innerHTML == 'Break' ? -1 : 1);
 });
 
 

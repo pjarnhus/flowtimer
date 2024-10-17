@@ -6,6 +6,7 @@ let extraBreakCount = 0;
 let longWorkCount = 0;
 const longWorkTime = 1500;
 const maxBreakCnt = 4;
+const extraBreakTime = 10;
 
 
 function post(state, tick, longWorkCount, extraBreakCount)
@@ -71,6 +72,12 @@ onmessage = function(e){
             extraBreakCount = 0;
             post(state, tick, longWorkCount, extraBreakCount);
             timeoutID = clearTimeout(timeoutID);
+        }
+        else if(state == -1)
+        {
+            tick = Math.floor(tick/5);
+            tick += extraBreakCount * extraBreakTime;
+            extraBreakCount = 0;
         }
     }
 }
