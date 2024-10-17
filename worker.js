@@ -7,6 +7,7 @@ let longWorkCount = 0;
 const longWorkTime = 1500;
 const maxBreakCnt = 4;
 const extraBreakTime = 10;
+const freezeTime = 600;
 
 
 function post(state, tick, longWorkCount, extraBreakCount)
@@ -15,7 +16,8 @@ function post(state, tick, longWorkCount, extraBreakCount)
         "tick": tick,
         "state": state,
         "longWorkCount": longWorkCount,
-        "extraBreakCount": extraBreakCount
+        "extraBreakCount": extraBreakCount,
+        "disableButton": tick < freezeTime
     };
     self.postMessage(mess);
     return

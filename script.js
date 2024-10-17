@@ -2,9 +2,6 @@ let activityBtn = document.getElementById('start')
 let stopBtn = document.getElementById('stop')
 let tracker = document.getElementById('tracker')
 
-// Settings
-const freezeTime = 600;
-
 let maxBreakCnt = tracker.children.length;
 let extraBreakCount = 0;
 let longWorkCount = 0;
@@ -35,22 +32,6 @@ function updateTitle(hr, min, sec)
         document.title = "FlowTimer - Break - " + formatOutput(hr) + ":" + formatOutput(min) + ":" + formatOutput(sec);
 }    
 
-function updateButton()
-{
-    if(state == 1)
-        activityBtn.disabled = tick < freezeTime;
-    if(activityBtn.disabled)
-    {
-        activityBtn.classList.remove('active');
-        activityBtn.classList.add('inactive');
-    }
-    else
-    {
-        activityBtn.classList.remove('inactive');
-        activityBtn.classList.add('active');
-    }
-
-}
 
 function updateTracker()
 {
@@ -79,16 +60,33 @@ function updateDisplay(tick)
     sec = sec - 60 * min;
     updateClock(hr, min, sec);
     updateTitle(hr, min, sec);
-    //updateButton();
     updateTracker();
 }
+
+
+function updateButton(newState)
+{
+    activityBtn.disabled = newState;
+    if(activityBtn.disabled)
+    {
+        activityBtn.classList.remove('active');
+        activityBtn.classList.add('inactive');
+    }
+    else
+    {
+        activityBtn.classList.remove('inactive');
+        activityBtn.classList.add('active');
+    }
+
+}
+
 
 function onStateChange()
 {
     if(state == 0)
     {
         activityBtn.innerHTML = 'Work';
-        activityBtn.disabled = false;
+        updateButton(false);
         return
     }
     if(state == 1)
@@ -96,13 +94,8 @@ function onStateChange()
         activityBtn.innerHTML = 'Break';
         return
     }
-    if(state == -1)
-    {
-        activityBtn.disabled = true;
-        return
-    }
-    
 }
+
 
 const worker = new Worker('worker.js');
 
@@ -113,6 +106,10 @@ worker.onmessage = (event) => {
     {
         state = event.data['state'];
         onStateChange();
+    }
+    if((event.data['disableButton'] ^ activityBtn.disabled) && state == 1)
+    {
+        updateButton(event.data['disableButton']);
     }
     updateDisplay(event.data['tick']);
 }
