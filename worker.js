@@ -50,7 +50,13 @@ function update()
     tick = targetTime + state * Math.floor((currentTime-startTime)/1000);
 
     if(tick <= 0 && state == -1)
+    {
         state = 0;
+        tick = 0;
+        longWorkTick = 0;
+        targetTime = 0;
+    }
+
     
     if(state == 1)
         updateLongWork(tick);
@@ -80,6 +86,7 @@ onmessage = function(e){
         tick = 0;
         longWorkTick = 0;
         longWorkCount = 0;
+        targetTime = 0;
         extraBreakCount = 0;
         post(state, tick, longWorkCount, extraBreakCount);
     }
