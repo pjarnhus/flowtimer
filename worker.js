@@ -6,7 +6,7 @@ let longWorkCount = 0;
 let startTime = Date.now();
 let targetTime = 0;
 const longWorkTime = 1500;
-const maxBreakCnt = 4;
+const maxBreakCount = 4;
 const extraBreakTime = 600;
 const freezeTime = 600;
 
@@ -62,7 +62,7 @@ function update()
     if(state == 1)
         updateLongWork(tick);
     
-    if(extraBreakCount == maxBreakCnt)
+    if(extraBreakCount == maxBreakCount)
     {
         state = -1;
         targetTime = Math.floor(tick/5);
