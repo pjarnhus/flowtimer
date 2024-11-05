@@ -3,6 +3,7 @@ let timeoutID = null;
 let tick = 0;
 let extraBreakCount = 0;
 let longWorkCount = 0;
+let bankedWorkCount = 0;
 let startTime = Date.now();
 let targetTime = 0;
 const longWorkTime = 1500;
@@ -26,7 +27,7 @@ function post(state, tick, longWorkCount, extraBreakCount)
 function updateLongWork(tick)
 {
     
-    let tempCount = Math.floor(tick / longWorkTime);
+    let tempCount = Math.floor(tick / longWorkTime) + bankedWorkCount;
     let K = 2 * maxBreakCount - 1;
     if(K**2 - 4 * (2 * tempCount -K) > 0)
     {
@@ -86,6 +87,7 @@ onmessage = function(e){
     {
         tick = 0;
         longWorkCount = 0;
+        bankedWorkCount = 0;
         targetTime = 0;
         extraBreakCount = 0;
         post(state, tick, longWorkCount, extraBreakCount);
@@ -95,6 +97,7 @@ onmessage = function(e){
         targetTime = Math.floor(tick/5);
         targetTime += extraBreakCount * extraBreakTime;
         extraBreakCount = 0;
+        bankedWorkCount = longWorkCount;
     }
     update();
 }
