@@ -1,6 +1,11 @@
 let activityBtn = document.getElementById('start')
 let stopBtn = document.getElementById('stop')
 let tracker = document.getElementById('tracker')
+// Get overlay elements
+const overlay = document.getElementById('activity-overlay');
+const descInput = document.getElementById('activity-desc');
+const saveBtn = document.getElementById('save-desc');
+const cancelBtn = document.getElementById('cancel-desc');
 
 let maxBreakCnt = tracker.children.length;
 let extraBreakCount = 0;
@@ -81,6 +86,20 @@ function updateButton(newState)
 }
 
 
+// Show overlay function
+function showOverlay() {
+    descInput.value = ""; // clear previous value
+    overlay.style.display = "flex";
+    descInput.focus();
+}
+
+// Hide overlay function
+function hideOverlay() {
+    overlay.style.display = "none";
+}
+
+
+
 function onStateChange()
 {
     if(state == 0)
@@ -115,10 +134,35 @@ worker.onmessage = (event) => {
 }
 
 activityBtn.addEventListener('click', () => {
-    worker.postMessage(activityBtn.innerHTML == 'Break' ? -1 : 1);
+    if(activityBtn.innerHTML == 'Break'){
+        showOverlay();
+    }
+    else {
+        worker.postMessage(1);
+    }
+});
+
+// Save button
+saveBtn.addEventListener('click', () => {
+    const description = descInput.value.trim();
+    if(description) {
+        // You can save the description somewhere or send it to the worker if needed
+        // For now, just proceed as before:
+        worker.postMessage(-1);
+        hideOverlay();
+        // Optionally, store or use the description, e.g.,
+        // localStorage.setItem('lastActivityDesc', description);
+    } else {
+        alert("Please enter a description.");
+    }
 });
 
 
 stopBtn.addEventListener('click', () => {
     worker.postMessage(0);
+});
+
+// Cancel button
+cancelBtn.addEventListener('click', () => {
+    hideOverlay();
 });
