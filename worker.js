@@ -5,6 +5,7 @@ let extraBreakCount = 0;
 let longWorkCount = 0;
 let bankedWorkCount = 0;
 let startTime = Date.now();
+let lastStartTime = Date.now();
 let targetTime = 0;
 const longWorkTime = 1500;
 const maxBreakCount = 4;
@@ -77,7 +78,8 @@ function update()
 
 onmessage = function(e){
     state = e.data['state'];
-    console.log("State = ", state);
+    lastStartTime = startTime;
+    startTime = Date.now();
     targetTime = 0;
     if(timeoutID != null)
     {
@@ -91,10 +93,6 @@ onmessage = function(e){
         targetTime = 0;
         extraBreakCount = 0;
         post(state, tick, longWorkCount, extraBreakCount);
-    }
-    else if(state == 1)
-    {
-        startTime = Date.now();
     }
     else if(state == -1)
     {
