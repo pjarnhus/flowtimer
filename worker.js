@@ -77,6 +77,7 @@ function update()
 
 onmessage = function(e){
     state = e.data['state'];
+    console.log("State = ", state);
     targetTime = 0;
     if(timeoutID != null)
     {
