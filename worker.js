@@ -76,8 +76,7 @@ function update()
 }
 
 onmessage = function(e){
-    state = e.data;
-    startTime = Date.now();
+    state = e.data['state'];
     targetTime = 0;
     if(timeoutID != null)
     {
@@ -91,6 +90,10 @@ onmessage = function(e){
         targetTime = 0;
         extraBreakCount = 0;
         post(state, tick, longWorkCount, extraBreakCount);
+    }
+    else if(state == 1)
+    {
+        startTime = Date.now();
     }
     else if(state == -1)
     {

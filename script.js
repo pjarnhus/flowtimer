@@ -138,7 +138,7 @@ activityBtn.addEventListener('click', () => {
         showOverlay();
     }
     else {
-        worker.postMessage(1);
+        worker.postMessage({"state": 1, "message": ""});
     }
 });
 
@@ -148,7 +148,7 @@ saveBtn.addEventListener('click', () => {
     if(description) {
         // You can save the description somewhere or send it to the worker if needed
         // For now, just proceed as before:
-        worker.postMessage(-1);
+        worker.postMessage({"state":-1, "message": description});
         hideOverlay();
         // Optionally, store or use the description, e.g.,
         // localStorage.setItem('lastActivityDesc', description);
@@ -159,7 +159,7 @@ saveBtn.addEventListener('click', () => {
 
 
 stopBtn.addEventListener('click', () => {
-    worker.postMessage(0);
+    worker.postMessage({"state": 0, "message": ""});
 });
 
 // Cancel button
